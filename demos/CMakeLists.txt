@@ -125,3 +125,7 @@ add_demo(meltdown_ac SYSTEMS Linux PROCESSORS i686 x86_64)
 
 # Meltdown DE -- speculative computation with division by zero remainder
 add_demo(meltdown_de SYSTEMS Linux PROCESSORS i686 x86_64)
+
+add_demo(spectre_v11 PROCESSORS i686 x86_64)
+add_demo(ret2spec_ca SYSTEMS Linux)
+add_demo(speculation_over_single_step_trap SYSTEMS Linux)
