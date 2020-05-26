@@ -26,6 +26,7 @@
 constexpr static size_t kWriteBufferSize = 16;
 extern char hijackedcheck[];
 extern char aftercheck[];
+extern char beforecheck[];
 
 bool init = true;
 size_t colliding_offset;
@@ -39,7 +40,8 @@ static char InnerCall(size_t local_offset, size_t *size_in_heap) {
   if (init) {
     volatile size_t *write_buffer_copy = write_buffer;
     for (int i = kWriteBufferSize;; ++i) {
-      if (write_buffer_copy[i] == reinterpret_cast<size_t>(aftercheck)) {
+      if (write_buffer_copy[i] <= reinterpret_cast<size_t>(aftercheck) &&
+          write_buffer_copy[i] > reinterpret_cast<size_t>(beforecheck)) {
         colliding_offset = i;
         break;
       }
@@ -101,6 +103,13 @@ static char LeakByte() {
                   (i + 1) % 2048);
 
       // Return value of the InnerCall is ignored.
+#if SAFESIDE_LINUX
+      asm volatile("beforecheck:");
+#elif SAFESIDE_MAC
+      asm volatile("_beforecheck:");
+#else
+#  error Unsupported OS.
+#endif
       InnerCall(local_offset, size_in_heap.get());
 #if SAFESIDE_LINUX
       asm volatile("aftercheck:");
